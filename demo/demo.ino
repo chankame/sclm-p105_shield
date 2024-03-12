@@ -18,13 +18,17 @@ void loop() {
     }
     sclmP105Shield->Update();
     delay(1000);
-
     for(uint8_t j=0; j<8; j++){
-      sclmP105Shield->Digit(static_cast<Segment>(0x1b + (i & 0x1f)), 1 << j);
+      sclmP105Shield->Write(static_cast<Segment>(0x1b + (i & 0x1f)), 1 << j);
+      sclmP105Shield->Digit(static_cast<Segment>(0x1a), j);
       sclmP105Shield->Update();
-      delay(100);
+      delay(1000);
     }
-    sclmP105Shield->Digit(static_cast<Segment>(0x1b + (i & 0x1f))), glyph[i%16]);
+    sclmP105Shield->Color(Segment::InfusionVolume, Color::White);
+    sclmP105Shield->ResetGlyph(0x1b + (i & 0x1f));
+    sclmP105Shield->Update();
+    delay(1000);
+    sclmP105Shield->Cls();
     sclmP105Shield->Update();
     delay(1000);
   }

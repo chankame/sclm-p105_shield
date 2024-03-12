@@ -9,7 +9,7 @@
 SclmP105Shield::SclmP105Shield(
     uint8_t db0, uint8_t db1, uint8_t db2, uint8_t db3, uint8_t db4, uint8_t db5, uint8_t db6, uint8_t db7,
     uint8_t busy, uint8_t clk, uint8_t _cs, uint8_t _sw1, uint8_t _sw2)
-    : DB0(db0), DB1(db1), DB2(db2), DB3(db3), DB4(db4), DB5(db5), DB6(db6), DB7(db7), BUSY(busy), CLK(clk), _CS(_cs), _SW1(_sw1), _SW2(_sw2), buffer{}, dataLength(0)
+    : DB0(db0), DB1(db1), DB2(db2), DB3(db3), DB4(db4), DB5(db5), DB6(db6), DB7(db7), BUSY(busy), CLK(clk), _CS(_cs), _SW1(_sw1), _SW2(_sw2), buffer{}, dataLength(0x1b)
 {
 #ifdef PROTOTYPE
     BUSY = 10;
@@ -36,22 +36,22 @@ SclmP105Shield::SclmP105Shield(
     digitalWrite(_CS, HIGH);
 
     // T LU M LD B RD RU ?
-    Write(0x1b, 0b11011110); 
-    Write(0x1c, 0b00000110); 
-    Write(0x1d, 0b10111010); 
-    Write(0x1e, 0b10101110); 
-    Write(0x1f, 0b01100110); 
-    Write(0x20, 0b11101100); 
-    Write(0x21, 0b11111100); 
-    Write(0x22, 0b10000110); 
-    Write(0x23, 0b11111110); 
-    Write(0x24, 0b11101110); 
-    Write(0x25, 0b11110110); 
-    Write(0x26, 0b01111100); 
-    Write(0x27, 0b11011000); 
-    Write(0x28, 0b00111110); 
-    Write(0x29, 0b11111000); 
-    Write(0x2a, 0b11110000); 
+    Write(0x1b, 0b11011110);
+    Write(0x1c, 0b00000110);
+    Write(0x1d, 0b10111010);
+    Write(0x1e, 0b10101110);
+    Write(0x1f, 0b01100110);
+    Write(0x20, 0b11101100);
+    Write(0x21, 0b11111100);
+    Write(0x22, 0b10000110);
+    Write(0x23, 0b11111110);
+    Write(0x24, 0b11101110);
+    Write(0x25, 0b11110110);
+    Write(0x26, 0b01111100);
+    Write(0x27, 0b11011000);
+    Write(0x28, 0b00111110);
+    Write(0x29, 0b11111000);
+    Write(0x2a, 0b11110000);
     
     Update();
 }
@@ -91,7 +91,6 @@ void SclmP105Shield::Update()
     }
 //  while(digitalRead(BUSY));
     digitalWrite(_CS, HIGH);
-    dataLength = 0;
 #else
     while(digitalRead(BUSY));
     while(digitalRead(BUSY));
@@ -113,6 +112,11 @@ void SclmP105Shield::Update()
     delayMicroseconds(4);
     digitalWrite(_CS, HIGH);
 #endif
+    if(dataLength > 0x1b){
+        dataLength = 0x1b;
+        while(digitalRead(BUSY));
+        Update();
+    }
 }
 
 uint8_t SclmP105Shield::Read(uint8_t address)
@@ -125,7 +129,7 @@ void SclmP105Shield::Write(uint8_t address, uint8_t data)
 {
     if(address >= bufferLength) return;
     buffer[address] = data;
-    dataLength = address < 0x1b ? 0x1b : address + 1;
+    if(dataLength < address + 1) dataLength = address + 1;
 }
 
 void SclmP105Shield::Write(Segment segment, uint8_t data)
@@ -211,4 +215,9 @@ void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decim
 void SclmP105Shield::Number(float number, ::Color color, Line line)
 {
     Number(static_cast<int32_t>(number * 10), color, line, true);
+}
+
+void SclmP105Shield::ResetGlyph(uint8_t address)
+{
+    Write(address, glyph[(address-0x1b)&0x0f]);
 }

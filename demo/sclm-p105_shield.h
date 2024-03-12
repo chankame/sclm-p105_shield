@@ -61,9 +61,9 @@ enum class Line
 
 class SclmP105Shield
 {
-    static constexpr uint8_t bufferLength = 0x3b;
-    static constexpr uint8_t glyph[] = {
-        0b11011110, // 0 
+    static constexpr inline uint8_t bufferLength = 0x3b;
+    static constexpr inline uint8_t glyph[] = {
+        0b11011110, // 0
         0b00000110, // 1
         0b10111010, // 2
         0b10101110, // 3
@@ -109,4 +109,5 @@ public:
     void Digit(Segment segment, uint8_t number, ::Color color = Color::White);
     void Number(int32_t number, ::Color color = Color::White, Line line = Line::None, bool decimalPoint = false);
     void Number(float number, ::Color color = Color::White, Line line = Line::None);
+    void ResetGlyph(uint8_t address);
 };
