@@ -5,30 +5,32 @@ SclmP105Shield *sclmP105Shield;
 void setup() {
   // put your setup code here, to run once:
   sclmP105Shield = new SclmP105Shield(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 //  update();
-  sclmP105Shield->Cls();
-  for(uint8_t i=0; ; i++){
-    for(uint8_t j=0; j<10; j++){
-      sclmP105Shield->Digit(static_cast<Segment>(0x11 + j), i & 0x1f);
-    }
-    sclmP105Shield->Update();
-    delay(1000);
-    for(uint8_t j=0; j<8; j++){
-      sclmP105Shield->Write(static_cast<Segment>(0x1b + (i & 0x1f)), 1 << j);
-      sclmP105Shield->Digit(static_cast<Segment>(0x1a), j);
-      sclmP105Shield->Update();
-      delay(1000);
-    }
-    sclmP105Shield->Color(Segment::InfusionVolume, Color::White);
-    sclmP105Shield->ResetGlyph(0x1b + (i & 0x1f));
-    sclmP105Shield->Update();
-    delay(1000);
+
+  String lipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+  for(int i=0; i<lipsum.length(); i++){
     sclmP105Shield->Cls();
+    sclmP105Shield->String(&lipsum[i]);
+    sclmP105Shield->Update();
+    delay(200);
+  }
+  return;
+
+  sclmP105Shield->Cls();
+  sclmP105Shield->String("HelloWorld");
+  sclmP105Shield->Update();
+  delay(10000);
+  return;
+
+  for(uint8_t i=0; i<10; i++){
+    sclmP105Shield->Digit(static_cast<Segment>(0x11 + i), 0);
+  }
+  for(uint8_t i=0; i<36; i++){
+    sclmP105Shield->ResetGlyph(0x1b, i);
     sclmP105Shield->Update();
     delay(1000);
   }
