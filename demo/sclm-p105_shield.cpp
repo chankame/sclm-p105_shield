@@ -6,18 +6,8 @@
 #define CLK_WAIT 5
 #endif
 
-SclmP105Shield::SclmP105Shield(
-	uint8_t db0, uint8_t db1, uint8_t db2, uint8_t db3, uint8_t db4, uint8_t db5, uint8_t db6, uint8_t db7,
-	uint8_t busy, uint8_t clk, uint8_t _cs, uint8_t _sw1, uint8_t _sw2)
-	: DB0(db0), DB1(db1), DB2(db2), DB3(db3), DB4(db4), DB5(db5), DB6(db6), DB7(db7), BUSY(busy), CLK(clk), _CS(_cs), _SW1(_sw1), _SW2(_sw2), buffer{}, dataLength(0x1b)
+SclmP105Shield::SclmP105Shield() : buffer{}, dataLength(0x1b)
 {
-#ifdef PROTOTYPE
-	BUSY = 10;
-	CLK = 9;
-	_CS = 8;
-	_SW1 = 12;
-	_SW2 = 11;
-#endif
 	pinMode(DB0, OUTPUT);
 	pinMode(DB1, OUTPUT);
 	pinMode(DB2, OUTPUT);
@@ -220,22 +210,36 @@ void SclmP105Shield::Number(float number, ::Color color, Line line)
 void SclmP105Shield::String(::String string, ::Color color, Line line)
 {
 	Color(Segment::Colon, Color::Black);
-	Color(Segment::DecimalPointUpper, Color::Black);
-	Color(Segment::DecimalPointLower, Color::Black);
-	for(uint8_t i=0; i<10; i++){
+	switch(line){
+	case Line::None:
+		Color(Segment::DecimalPointUpper, Color::Black);
+		Color(Segment::DecimalPointLower, Color::Black);
+		break;
+	case Line::Upper:
+		Color(Segment::DecimalPointUpper, Color::Black);
+		break;
+	case Line::Lower:
+		Color(Segment::DecimalPointLower, Color::Black);
+		break;
+	}
+	uint8_t segment = 0;
+	uint8_t segmentBottom = 10;
+	if(line == Line::Upper) segmentBottom = 5;
+	if(line == Line::Lower) segment = 5;
+	for(uint8_t i=0; segment<segmentBottom; i++,segment++){
 		auto c = string[i];
 		if(c == '\0') break;
-		Digit(static_cast<Segment>(0x11+i), i, color);
+		Digit(static_cast<Segment>(0x11+segment), segment, color);
 		if(c >= '0' && c <= '9'){
-			ResetGlyph(0x1b+i, static_cast<uint8_t>(c-'0'));
+			ResetGlyph(0x1b+segment, static_cast<uint8_t>(c-'0'));
 		} else
 		if(c >= 'A' && c <= 'Z'){
-			ResetGlyph(0x1b+i, static_cast<uint8_t>(c-'A'+10));
+			ResetGlyph(0x1b+segment, static_cast<uint8_t>(c-'A'+10));
 		} else
 		if(c >= 'a' && c <= 'z'){
-			ResetGlyph(0x1b+i, static_cast<uint8_t>(c-'a'+10));
+			ResetGlyph(0x1b+segment, static_cast<uint8_t>(c-'a'+10));
 		} else {
-			ResetGlyph(0x1b+i, static_cast<uint8_t>(36));
+			ResetGlyph(0x1b+segment, static_cast<uint8_t>(36));
 		}
 	}
 }

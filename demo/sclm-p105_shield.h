@@ -61,6 +61,27 @@ enum class Line
 
 class SclmP105Shield
 {
+	static constexpr inline uint8_t DB0 = 0;
+	static constexpr inline uint8_t DB1 = 1;
+	static constexpr inline uint8_t DB2 = 2;
+	static constexpr inline uint8_t DB3 = 3;
+	static constexpr inline uint8_t DB4 = 4;
+	static constexpr inline uint8_t DB5 = 5;
+	static constexpr inline uint8_t DB6 = 6;
+	static constexpr inline uint8_t DB7 = 7;
+#ifdef PROTOTYPE
+	static constexpr inline uint8_t BUSY = 10;
+	static constexpr inline uint8_t CLK = 9;
+	static constexpr inline uint8_t _CS = 8;
+	static constexpr inline uint8_t _SW1 = 12;
+	static constexpr inline uint8_t _SW2 = 11;
+#else
+	static constexpr inline uint8_t BUSY = 8;
+	static constexpr inline uint8_t CLK = 9;
+	static constexpr inline uint8_t _CS = 10;
+	static constexpr inline uint8_t _SW1 = 11;
+	static constexpr inline uint8_t _SW2 = 12;
+#endif
 	static constexpr inline uint8_t bufferLength = 0x3b;
 	static constexpr inline uint8_t glyph[] = {
 		// T LU M LD B RD RU ?
@@ -81,7 +102,7 @@ class SclmP105Shield
 		0b11111000, // E
 		0b11110000, // F
 		0b11011100, // G
-		0b01110110, // H
+		0b01110100, // H
 		0b01010000, // I
 		0b00011110, // J
 		0b11110100, // K
@@ -102,25 +123,12 @@ class SclmP105Shield
 		0b10011010, // Z
 		0b00000000, // 
 	};
-	uint8_t DB0;
-	uint8_t DB1;
-	uint8_t DB2;
-	uint8_t DB3;
-	uint8_t DB4;
-	uint8_t DB5;
-	uint8_t DB6;
-	uint8_t DB7;
-	uint8_t BUSY;
-	uint8_t CLK;
-	uint8_t _CS;
-	uint8_t _SW1;
-	uint8_t _SW2;
 	uint8_t buffer[bufferLength];
 	uint8_t dataLength;
 
 	uint8_t bitrev(uint8_t bits);
 public:
-	SclmP105Shield(uint8_t db0, uint8_t db1, uint8_t db2, uint8_t db3, uint8_t db4, uint8_t db5, uint8_t db6, uint8_t db7, uint8_t busy, uint8_t clk, uint8_t _cs, uint8_t _sw1, uint8_t _sw2);
+	SclmP105Shield();
 	void Update();
 	uint8_t Read(uint8_t address);
 	void Write(uint8_t address, uint8_t data);
