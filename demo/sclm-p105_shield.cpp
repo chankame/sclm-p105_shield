@@ -115,6 +115,11 @@ uint8_t SclmP105Shield::Read(uint8_t address)
 	return buffer[address];
 }
 
+uint8_t SclmP105Shield::Read(Segment segment)
+{
+	return Read(static_cast<uint8_t>(segment));
+}
+
 void SclmP105Shield::Write(uint8_t address, uint8_t data)
 {
 	if(address >= bufferLength) return;
@@ -139,9 +144,14 @@ void SclmP105Shield::Cls()
 	}
 }
 
+void SclmP105Shield::Color(uint8_t address, ::Color color)
+{
+	Write(address, Read(address) & 0x1f | static_cast<uint8_t>(color) << 5);
+}
+
 void SclmP105Shield::Color(Segment segment, ::Color color)
 {
-	Write(segment, static_cast<uint8_t>(color) << 5);
+	Color(static_cast<uint8_t>(segment), color);
 }
 
 void SclmP105Shield::Digit(Segment segment, uint8_t number, ::Color color)
@@ -228,23 +238,42 @@ void SclmP105Shield::String(::String string, ::Color color, Line line)
 	if(line == Line::Lower) segment = 5;
 	for(uint8_t i=0; segment<segmentBottom; i++,segment++){
 		auto c = string[i];
-		if(c == '\0') break;
+	//	if(c == '\0') break;
 		Digit(static_cast<Segment>(0x11+segment), segment, color);
-		if(c >= '0' && c <= '9'){
-			ResetGlyph(0x1b+segment, static_cast<uint8_t>(c-'0'));
-		} else
-		if(c >= 'A' && c <= 'Z'){
-			ResetGlyph(0x1b+segment, static_cast<uint8_t>(c-'A'+10));
-		} else
-		if(c >= 'a' && c <= 'z'){
-			ResetGlyph(0x1b+segment, static_cast<uint8_t>(c-'a'+10));
-		} else {
-			ResetGlyph(0x1b+segment, static_cast<uint8_t>(36));
-		}
+		GlyphChar(segment, c);
+	}
+}
+
+void SclmP105Shield::Glyph(uint8_t id, uint8_t glyph)
+{
+	if(id >= 0x10) return;
+	Write(0x1b + id, glyph);
+}
+
+void SclmP105Shield::GlyphChar(uint8_t id, char c)
+{
+	if(c >= '0' && c <= '9'){
+		Glyph(id, glyph[c-'0']);
+	} else
+	if(c >= 'A' && c <= 'Z'){
+		Glyph(id, glyph[c-'A'+10]);
+	} else
+	if(c >= 'a' && c <= 'z'){
+		Glyph(id, glyph[c-'a'+10]);
+	} else {
+		Glyph(id, glyph[36]);
 	}
 }
 
 void SclmP105Shield::ResetGlyph(uint8_t address, uint8_t glyphID)
 {
 	Write(address, glyph[glyphID]);
+}
+
+void SclmP105Shield::Reset()
+{
+	for(uint8_t i=0; i<0x1b; i++){
+		Write(i, 0);
+	}
+	Update();
 }
