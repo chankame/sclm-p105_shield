@@ -126,7 +126,9 @@ class SclmP105Shield
 	uint8_t buffer[bufferLength];
 	uint8_t dataLength;
 
+#ifdef PROTOTYPE
 	uint8_t bitrev(uint8_t bits);
+#endif
 public:
 	SclmP105Shield();
 	void Update();
@@ -140,6 +142,7 @@ public:
 	void Color(Segment segment, ::Color color);
 	void Digit(Segment segment, uint8_t number, ::Color color = Color::White);
 	void Number(int32_t number, ::Color color = Color::White, Line line = Line::None, bool decimalPoint = false);
+	void Number(int16_t number, ::Color color = Color::White, Line line = Line::None);
 	void Number(float number, ::Color color = Color::White, Line line = Line::None);
 	void String(::String string, ::Color color = Color::White, Line line = Line::None);
 	void Glyph(uint8_t id, uint8_t glyph);

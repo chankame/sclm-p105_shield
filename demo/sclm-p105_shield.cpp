@@ -25,27 +25,10 @@ SclmP105Shield::SclmP105Shield() : buffer{}, dataLength(0x1b)
 	digitalWrite(CLK, LOW);
 	digitalWrite(_CS, HIGH);
 
-	// T LU M LD B RD RU ?
-	Write(0x1b, 0b11011110);
-	Write(0x1c, 0b00000110);
-	Write(0x1d, 0b10111010);
-	Write(0x1e, 0b10101110);
-	Write(0x1f, 0b01100110);
-	Write(0x20, 0b11101100);
-	Write(0x21, 0b11111100);
-	Write(0x22, 0b10000110);
-	Write(0x23, 0b11111110);
-	Write(0x24, 0b11101110);
-	Write(0x25, 0b11110110);
-	Write(0x26, 0b01111100);
-	Write(0x27, 0b11011000);
-	Write(0x28, 0b00111110);
-	Write(0x29, 0b11111000);
-	Write(0x2a, 0b11110000);
-	
-	Update();
+	Reset();
 }
 
+#ifdef PROTOTYPE
 uint8_t SclmP105Shield::bitrev(uint8_t bits)
 {
 	return bits >> 7 & 0b00000001
@@ -57,10 +40,10 @@ uint8_t SclmP105Shield::bitrev(uint8_t bits)
 		 | bits << 5 & 0b01000000
 		 | bits << 7 & 0b10000000;
 }
+#endif
 
 void SclmP105Shield::Update()
 {
-#if true
 	while(digitalRead(BUSY));
 	while(digitalRead(BUSY));
 	digitalWrite(_CS, LOW);
@@ -81,27 +64,6 @@ void SclmP105Shield::Update()
 	}
 //  while(digitalRead(BUSY));
 	digitalWrite(_CS, HIGH);
-#else
-	while(digitalRead(BUSY));
-	while(digitalRead(BUSY));
-	digitalWrite(_CS, LOW);
-	delayMicroseconds(6);
-	for(int i=0; i<27; i++){
-		auto data = buffer[i];
-		digitalWrite(CLK, HIGH);
-#ifdef PROTOTYPE
-		PORTD = bitrev(data);
-#else
-		PORTD = data;
-#endif
-		delayMicroseconds(6);
-		while(digitalRead(BUSY));
-		digitalWrite(CLK, LOW);
-		delayMicroseconds(6);
-	}
-	delayMicroseconds(4);
-	digitalWrite(_CS, HIGH);
-#endif
 	if(dataLength > 0x1b){
 		dataLength = 0x1b;
 		while(digitalRead(BUSY));
@@ -156,7 +118,13 @@ void SclmP105Shield::Color(Segment segment, ::Color color)
 
 void SclmP105Shield::Digit(Segment segment, uint8_t number, ::Color color)
 {
-	Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+//	Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+	if(number < 0x10){
+		Write(segment, static_cast<uint8_t>(segment)-0x11 | static_cast<uint8_t>(color) << 5);
+		GlyphChar(static_cast<uint8_t>(segment)-0x11, number+'0');
+	} else {
+		Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+	}
 }
 
 void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decimalPoint)
@@ -212,6 +180,11 @@ void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decim
 	}
 }
 
+void SclmP105Shield::Number(int16_t number, ::Color color, Line line)
+{
+	Number(static_cast<int32_t>(number), color, line);
+}
+
 void SclmP105Shield::Number(float number, ::Color color, Line line)
 {
 	Number(static_cast<int32_t>(number * 10), color, line, true);
@@ -239,7 +212,8 @@ void SclmP105Shield::String(::String string, ::Color color, Line line)
 	for(uint8_t i=0; segment<segmentBottom; i++,segment++){
 		auto c = string[i];
 	//	if(c == '\0') break;
-		Digit(static_cast<Segment>(0x11+segment), segment, color);
+	//	Digit(static_cast<Segment>(0x11+segment), segment, color);
+		Write(0x11+segment, segment | static_cast<uint8_t>(color) << 5);
 		GlyphChar(segment, c);
 	}
 }
@@ -265,15 +239,26 @@ void SclmP105Shield::GlyphChar(uint8_t id, char c)
 	}
 }
 
-void SclmP105Shield::ResetGlyph(uint8_t address, uint8_t glyphID)
-{
-	Write(address, glyph[glyphID]);
-}
-
 void SclmP105Shield::Reset()
 {
 	for(uint8_t i=0; i<0x1b; i++){
 		Write(i, 0);
 	}
+	GlyphChar(0x00, '0');
+	GlyphChar(0x01, '1');
+	GlyphChar(0x02, '2');
+	GlyphChar(0x03, '3');
+	GlyphChar(0x04, '4');
+	GlyphChar(0x05, '5');
+	GlyphChar(0x06, '6');
+	GlyphChar(0x07, '7');
+	GlyphChar(0x08, '8');
+	GlyphChar(0x09, '9');
+	GlyphChar(0x0a, 'A');
+	GlyphChar(0x0b, 'B');
+	GlyphChar(0x0c, 'C');
+	GlyphChar(0x0d, 'D');
+	GlyphChar(0x0e, 'E');
+	GlyphChar(0x0f, 'F');
 	Update();
 }
