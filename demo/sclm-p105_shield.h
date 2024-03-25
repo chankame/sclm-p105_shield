@@ -83,6 +83,7 @@ class SclmP105Shield
 	static constexpr inline uint8_t _SW2 = 12;
 #endif
 	static constexpr inline uint8_t bufferLength = 0x3b;
+	static constexpr inline uint8_t backBufferLength = 10;
 	static constexpr inline uint8_t glyph[] = {
 		// T LU M LD B RD RU ?
 		0b11011110, // 0
@@ -124,7 +125,9 @@ class SclmP105Shield
 		0b00000000, // 
 	};
 	uint8_t buffer[bufferLength];
+	uint8_t backBuffer[backBufferLength];
 	uint8_t dataLength;
+	uint16_t bitString;
 
 #ifdef PROTOTYPE
 	uint8_t bitrev(uint8_t bits);

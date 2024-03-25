@@ -6,7 +6,7 @@
 #define CLK_WAIT 5
 #endif
 
-SclmP105Shield::SclmP105Shield() : buffer{}, dataLength(0x1b)
+SclmP105Shield::SclmP105Shield() : buffer{}, backBuffer{}, dataLength(0x1b), bitString(0)
 {
 	pinMode(DB0, OUTPUT);
 	pinMode(DB1, OUTPUT);
@@ -44,11 +44,18 @@ uint8_t SclmP105Shield::bitrev(uint8_t bits)
 
 void SclmP105Shield::Update()
 {
+#if true
+	if(dataLength == 0x1b){
+		for(uint8_t i=0; i<backBufferLength; i++){
+			buffer[0x11+i] = backBuffer[i];
+		}
+	}
+#endif
 	while(digitalRead(BUSY));
 	while(digitalRead(BUSY));
 	digitalWrite(_CS, LOW);
 //  delayMicroseconds(CLK_WAIT);
-	for(int i=0; i<dataLength; i++){
+	for(uint8_t i=0; i<dataLength; i++){
 		while(digitalRead(BUSY));
 		digitalWrite(CLK, HIGH);
 		auto data = buffer[i];
@@ -74,6 +81,7 @@ void SclmP105Shield::Update()
 uint8_t SclmP105Shield::Read(uint8_t address)
 {
 	if(address >= bufferLength) return 0;
+	if(address >= 0x11 && address < 0x1b) return backBuffer[address - 0x11];
 	return buffer[address];
 }
 
@@ -85,7 +93,8 @@ uint8_t SclmP105Shield::Read(Segment segment)
 void SclmP105Shield::Write(uint8_t address, uint8_t data)
 {
 	if(address >= bufferLength) return;
-	buffer[address] = data;
+	if(address >= 0x11 && address < 0x1b) backBuffer[address - 0x11] = data;
+	else buffer[address] = data;
 	if(dataLength < address + 1) dataLength = address + 1;
 }
 
@@ -118,7 +127,10 @@ void SclmP105Shield::Color(Segment segment, ::Color color)
 
 void SclmP105Shield::Digit(Segment segment, uint8_t number, ::Color color)
 {
-//	Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+	if(bitString == 0){
+		Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+		return;
+	}
 	if(number < 0x10){
 		Write(segment, static_cast<uint8_t>(segment)-0x11 | static_cast<uint8_t>(color) << 5);
 		GlyphChar(static_cast<uint8_t>(segment)-0x11, number+'0');
@@ -226,6 +238,11 @@ void SclmP105Shield::Glyph(uint8_t id, uint8_t glyph)
 
 void SclmP105Shield::GlyphChar(uint8_t id, char c)
 {
+	if(id == c-'0'){
+		bitString &= ~(0x01 << id);
+	} else {
+		bitString |= 0x01 << id;
+	}
 	if(c >= '0' && c <= '9'){
 		Glyph(id, glyph[c-'0']);
 	} else
