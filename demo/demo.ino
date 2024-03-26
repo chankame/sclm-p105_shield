@@ -12,15 +12,6 @@ void loop() {
   sclmP105Shield->Reset();
   delay(1000);
 
-  // Mix
-  sclmP105Shield->Cls();
-  sclmP105Shield->String("SCORE", Color::Magenta, Line::Upper);
-  for(int i=0; i<2000; i++){
-    sclmP105Shield->Number(-i, Color::Yellow, Line::Lower);
-    sclmP105Shield->Update();
-  }
-//return;
-
   // Back Light
   sclmP105Shield->String("Back Light");
   sclmP105Shield->Update();
@@ -113,12 +104,23 @@ void loop() {
   sclmP105Shield->String("Upper", Color::Magenta, Line::Upper);
   sclmP105Shield->Update();
   delay(1000);
-//String lipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+  // Mix
+  sclmP105Shield->Cls();
+  sclmP105Shield->String("COUNT", Color::Magenta, Line::Upper);
+  for(int i=-500; i<0; i++){
+    sclmP105Shield->Number(i, Color::Yellow, Line::Lower);
+    sclmP105Shield->Update();
+  }
+  sclmP105Shield->String("COUNT", Color::Magenta, Line::Lower);
+  for(int i=0; i<500; i++){
+    sclmP105Shield->Number(i, Color::Yellow, Line::Upper);
+    sclmP105Shield->Update();
+  }
   String lipsum = "          The quick brown fox jumps over the lazy dog";
   for(int i=0; i<lipsum.length(); i++){
     sclmP105Shield->Cls();
     sclmP105Shield->String(&lipsum[i]);
     sclmP105Shield->Update();
-    delay(256-i/2);
+    delay(200);
   }
 }

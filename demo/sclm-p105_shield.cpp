@@ -113,6 +113,9 @@ void SclmP105Shield::Cls()
 	for(uint8_t i=0x01; i<0x1b; i++){
 		Write(i, static_cast<uint8_t>(Color::Black) << 5);
 	}
+	for(uint8_t i=0; i<0x10; i++){
+		GlyphChar(i, '0'+i);
+	}
 }
 
 void SclmP105Shield::Color(uint8_t address, ::Color color)
@@ -238,22 +241,15 @@ void SclmP105Shield::Glyph(uint8_t id, uint8_t glyph)
 
 void SclmP105Shield::GlyphChar(uint8_t id, char c)
 {
-	if(id == c-'0'){
-		bitString &= ~(0x01 << id);
-	} else {
-		bitString |= 0x01 << id;
+	uint8_t code = 36;
+	if(c >= '0' && c <= '9')      code = c - '0';
+	else if(c >= 'A' && c <= 'Z') code = c - 'A' + 10;
+	else if(c >= 'a' && c <= 'z') code = c - 'a' + 10;
+	if(code < 0x10){
+		if(id == code) bitString &= ~(0x0001 << id);
+		else           bitString |=   0x0001 << id;
 	}
-	if(c >= '0' && c <= '9'){
-		Glyph(id, glyph[c-'0']);
-	} else
-	if(c >= 'A' && c <= 'Z'){
-		Glyph(id, glyph[c-'A'+10]);
-	} else
-	if(c >= 'a' && c <= 'z'){
-		Glyph(id, glyph[c-'a'+10]);
-	} else {
-		Glyph(id, glyph[36]);
-	}
+	Glyph(id, glyph[code]);
 }
 
 void SclmP105Shield::Reset()
