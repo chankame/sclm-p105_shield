@@ -128,18 +128,23 @@ void SclmP105Shield::Color(Segment segment, ::Color color)
 	Color(static_cast<uint8_t>(segment), color);
 }
 
-void SclmP105Shield::Digit(Segment segment, uint8_t number, ::Color color)
+void SclmP105Shield::Digit(uint8_t address, uint8_t number, ::Color color = Color::White)
 {
 	if(bitString == 0){
-		Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+		Write(address, number & 0x1f | static_cast<uint8_t>(color) << 5);
 		return;
 	}
 	if(number < 0x10){
-		Write(segment, static_cast<uint8_t>(segment)-0x11 | static_cast<uint8_t>(color) << 5);
-		GlyphChar(static_cast<uint8_t>(segment)-0x11, number+'0');
+		Write(address, address-0x11 | static_cast<uint8_t>(color) << 5);
+		GlyphChar(address-0x11, number+'0');
 	} else {
-		Write(segment, number & 0x1f | static_cast<uint8_t>(color) << 5);
+		Write(address, number & 0x1f | static_cast<uint8_t>(color) << 5);
 	}
+}
+
+void SclmP105Shield::Digit(Segment segment, uint8_t number, ::Color color)
+{
+	Digit(static_cast<uint8_t>(segment), number, color);
 }
 
 void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decimalPoint)
@@ -178,18 +183,17 @@ void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decim
 	if(line == Line::Lower) segmentTop = 0x16;
 	bool isMinus = false;
 	if(!decimalPoint && number > -1000 && number < 10000){
-		segment--;
-		Digit(Segment::Digit9, 0, Color::Black);
+		Digit(segment--, 0, Color::Black);
 	}
 	if(number < 0){
 		isMinus = true;
 		number *= -1;
 	}
 	for(; segment>=segmentTop; segment--){
-		Digit(static_cast<Segment>(segment), number%10, color);
+		Digit(segment, number%10, color);
 		number /= 10;
 		if(number == 0 && color != Color::Black){
-			if(isMinus && segment>segmentTop) Digit(static_cast<Segment>(--segment), 0x12, color);
+			if(isMinus && segment>segmentTop) Digit(--segment, 0x12, color);
 			color = Color::Black;
 		}
 	}
@@ -203,6 +207,43 @@ void SclmP105Shield::Number(int16_t number, ::Color color, Line line)
 void SclmP105Shield::Number(float number, ::Color color, Line line)
 {
 	Number(static_cast<int32_t>(number * 10), color, line, true);
+}
+
+void SclmP105Shield::Hex(uint32_t number, ::Color color, Line line)
+{
+	Color(Segment::Colon, Color::Black);
+	switch(line){
+	case Line::None:
+		Color(Segment::DecimalPointUpper, Color::Black);
+		Color(Segment::DecimalPointLower, Color::Black);
+		break;
+	case Line::Upper:
+		Color(Segment::DecimalPointUpper, Color::Black);
+		break;
+	case Line::Lower:
+		Color(Segment::DecimalPointLower, Color::Black);
+		break;
+	}
+	uint8_t segment = 0x1a;
+	uint8_t segmentTop = 0x11;
+	if(line == Line::Upper) segment = 0x15;
+	if(line == Line::Lower) segmentTop = 0x16;
+	if(number < 0x10000){
+		Digit(segment--, 0, Color::Black);
+	}
+	for(; segment>=segmentTop; segment--){
+		Digit(segment, number&0xf, color);
+		number >>= 4;
+		if(number == 0 && color != Color::Black){
+			color = Color::Black;
+		}
+	}
+}
+
+void SclmP105Shield::Time()
+{
+	auto time = millis();
+	Number(static_cast<int32_t>(time));	
 }
 
 void SclmP105Shield::String(::String string, ::Color color, Line line)

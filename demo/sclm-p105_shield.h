@@ -143,10 +143,13 @@ public:
 	void Cls();
 	void Color(uint8_t address, ::Color color);
 	void Color(Segment segment, ::Color color);
+	void Digit(uint8_t address, uint8_t number, ::Color color = Color::White);
 	void Digit(Segment segment, uint8_t number, ::Color color = Color::White);
 	void Number(int32_t number, ::Color color = Color::White, Line line = Line::None, bool decimalPoint = false);
 	void Number(int16_t number, ::Color color = Color::White, Line line = Line::None);
 	void Number(float number, ::Color color = Color::White, Line line = Line::None);
+	void Hex(uint32_t number, ::Color color = Color::White, Line line = Line::None);
+	void Time();
 	void String(::String string, ::Color color = Color::White, Line line = Line::None);
 	void Glyph(uint8_t id, uint8_t glyph);
 	void GlyphChar(uint8_t id, char c);

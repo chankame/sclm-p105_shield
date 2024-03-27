@@ -12,6 +12,14 @@ void loop() {
   sclmP105Shield->Reset();
   delay(1000);
 
+#if false
+  while(true){
+    sclmP105Shield->Time();
+    sclmP105Shield->Update();
+    delay(1000);
+  }
+#endif
+
   // Back Light
   sclmP105Shield->String("Back Light");
   sclmP105Shield->Update();
@@ -88,6 +96,13 @@ void loop() {
     }
     sclmP105Shield->Update();
   }
+  // Hex
+  for(uint32_t i=1; i<0x100000; i<<=1){
+    sclmP105Shield->Number(static_cast<int32_t>(i), Color::Yellow, Line::Upper);
+    sclmP105Shield->Hex(i, Color::Magenta, Line::Lower);
+    sclmP105Shield->Update();
+    delay(200);
+  }
   // String
   sclmP105Shield->Cls();
   sclmP105Shield->String("HelloWorld");
@@ -111,6 +126,7 @@ void loop() {
     sclmP105Shield->Number(i, Color::Yellow, Line::Lower);
     sclmP105Shield->Update();
   }
+  sclmP105Shield->Cls();
   sclmP105Shield->String("COUNT", Color::Magenta, Line::Lower);
   for(int i=0; i<500; i++){
     sclmP105Shield->Number(i, Color::Yellow, Line::Upper);
@@ -122,5 +138,20 @@ void loop() {
     sclmP105Shield->String(&lipsum[i]);
     sclmP105Shield->Update();
     delay(200);
+  }
+  // Custom Glyph
+  sclmP105Shield->Glyph(0, 0b10000000);
+  sclmP105Shield->Glyph(1, 0b00000010);
+  sclmP105Shield->Glyph(2, 0b00000100);
+  sclmP105Shield->Glyph(3, 0b00001000);
+  sclmP105Shield->Glyph(4, 0b00010000);
+  sclmP105Shield->Glyph(5, 0b01000000);
+  for(int i=0; i<48; i++){
+    sclmP105Shield->Number(i, Color::Yellow, Line::Upper);
+    for(int j=0; j<10; j++){
+		  sclmP105Shield->Write(0x11+j, i%6 | static_cast<uint8_t>(j%7) << 5);
+    }
+    sclmP105Shield->Update();
+    delay(100);
   }
 }
