@@ -149,14 +149,15 @@ void SclmP105Shield::Digit(Segment segment, uint8_t number, ::Color color)
 
 void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decimalPoint)
 {
-	Color(Segment::Colon, Color::Black);
 	if(decimalPoint){
 		switch(line){
 		case Line::None:
+			Color(Segment::Colon, Color::Black);
 			Color(Segment::DecimalPointUpper, Color::Black);
 			Color(Segment::DecimalPointLower, color);
 			break;
 		case Line::Upper:
+			Color(Segment::Colon, Color::Black);
 			Color(Segment::DecimalPointUpper, color);
 			break;
 		case Line::Lower:
@@ -166,10 +167,12 @@ void SclmP105Shield::Number(int32_t number, ::Color color, Line line, bool decim
 	} else {
 		switch(line){
 		case Line::None:
+			Color(Segment::Colon, Color::Black);
 			Color(Segment::DecimalPointUpper, Color::Black);
 			Color(Segment::DecimalPointLower, Color::Black);
 			break;
 		case Line::Upper:
+			Color(Segment::Colon, Color::Black);
 			Color(Segment::DecimalPointUpper, Color::Black);
 			break;
 		case Line::Lower:
@@ -211,13 +214,14 @@ void SclmP105Shield::Number(float number, ::Color color, Line line)
 
 void SclmP105Shield::Hex(uint32_t number, ::Color color, Line line)
 {
-	Color(Segment::Colon, Color::Black);
 	switch(line){
 	case Line::None:
+		Color(Segment::Colon, Color::Black);
 		Color(Segment::DecimalPointUpper, Color::Black);
 		Color(Segment::DecimalPointLower, Color::Black);
 		break;
 	case Line::Upper:
+		Color(Segment::Colon, Color::Black);
 		Color(Segment::DecimalPointUpper, Color::Black);
 		break;
 	case Line::Lower:
@@ -240,21 +244,43 @@ void SclmP105Shield::Hex(uint32_t number, ::Color color, Line line)
 	}
 }
 
-void SclmP105Shield::Time()
+void SclmP105Shield::Time(uint32_t ms, ::Color color)
 {
-	auto time = millis();
-	Number(static_cast<int32_t>(time));	
+	Color(Segment::Time, color);
+	Color(Segment::Colon, ms/500%2 ? Color::Black : color);
+	Color(Segment::DecimalPointUpper, Color::Black);
+	Color(Segment::DecimalPointLower, color);
+	Digit(Segment::Digit9, ms/100%10, color);	
+	Digit(Segment::Digit8, ms/1000%10, color);	
+	Digit(Segment::Digit7, ms/10000%6, color);	
+	Color(Segment::Digit6, Color::Black);	
+	Color(Segment::Digit5, Color::Black);	
+	Digit(Segment::Digit4, ms/60000%10, color);	
+	Digit(Segment::Digit3, ms/600000%6, color);	
+	Digit(Segment::Digit2, ms/3600000%10, color);
+	if(ms/36000000){
+		Digit(Segment::Digit1, ms/36000000%10, color);	
+		if(ms/360000000){
+			Digit(Segment::Digit0, ms/360000000%10, color);	
+		} else {
+			Color(Segment::Digit0, Color::Black);	
+		}
+	} else {
+		Color(Segment::Digit1, Color::Black);	
+		Color(Segment::Digit0, Color::Black);	
+	}
 }
 
 void SclmP105Shield::String(::String string, ::Color color, Line line)
 {
-	Color(Segment::Colon, Color::Black);
 	switch(line){
 	case Line::None:
+		Color(Segment::Colon, Color::Black);
 		Color(Segment::DecimalPointUpper, Color::Black);
 		Color(Segment::DecimalPointLower, Color::Black);
 		break;
 	case Line::Upper:
+		Color(Segment::Colon, Color::Black);
 		Color(Segment::DecimalPointUpper, Color::Black);
 		break;
 	case Line::Lower:

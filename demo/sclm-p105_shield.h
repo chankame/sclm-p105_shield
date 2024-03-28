@@ -149,7 +149,7 @@ public:
 	void Number(int16_t number, ::Color color = Color::White, Line line = Line::None);
 	void Number(float number, ::Color color = Color::White, Line line = Line::None);
 	void Hex(uint32_t number, ::Color color = Color::White, Line line = Line::None);
-	void Time();
+	void Time(uint32_t ms, ::Color color = Color::White);
 	void String(::String string, ::Color color = Color::White, Line line = Line::None);
 	void Glyph(uint8_t id, uint8_t glyph);
 	void GlyphChar(uint8_t id, char c);
