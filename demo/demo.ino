@@ -89,10 +89,11 @@ void loop() {
 		sclmP105Shield->Update();
 	}
 	// Hex
-	for(uint32_t i=0; i<0x10000; i+=10){
+	for(uint32_t i=0x00f0; i<0x010f; i++){
 		sclmP105Shield->Number(static_cast<int32_t>(i), Color::Yellow, Line::Upper);
 		sclmP105Shield->Hex(i, Color::Magenta, Line::Lower);
 		sclmP105Shield->Update();
+		delay(100);
 	}
 	// Time
 	for(uint32_t ms=millis(); millis()<ms+10000; ){
@@ -136,16 +137,28 @@ void loop() {
 		delay(200);
 	}
 	// Custom Glyph
-	sclmP105Shield->Glyph(0, 0b10000000);
-	sclmP105Shield->Glyph(1, 0b00000010);
-	sclmP105Shield->Glyph(2, 0b00000100);
-	sclmP105Shield->Glyph(3, 0b00001000);
-	sclmP105Shield->Glyph(4, 0b00010000);
-	sclmP105Shield->Glyph(5, 0b01000000);
-	for(int i=0; i<48; i++){
-		sclmP105Shield->Number(i, Color::Yellow, Line::Upper);
-		for(int j=0; j<10; j++){
-			sclmP105Shield->Write(0x11+j, i%6 | static_cast<uint8_t>(j%7) << 5);
+	sclmP105Shield->Cls();
+	uint8_t fall[] = {
+		0b10000000,
+		0b10100000,
+		0b10101000,
+		0b00101000,
+		0b00001000,
+	};
+	uint8_t guru[] = {
+		0b10000000,
+		0b00000010,
+		0b00000100,
+		0b00001000,
+		0b00010000,
+		0b01000000,
+	};
+	for(int i=0; i<40; i++){
+		for(uint8_t j=0; j<5; j++){
+			sclmP105Shield->Glyph(j, fall[(i+j)%5]);
+			sclmP105Shield->Write(0x11+j, j | (7+(i+j)/5) << 5);
+			sclmP105Shield->Glyph((5+j), guru[(i+j)%6]);
+			sclmP105Shield->Write(0x16+j, (5+j) | (j%6) << 5);
 		}
 		sclmP105Shield->Update();
 		delay(100);

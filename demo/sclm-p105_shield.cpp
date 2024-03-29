@@ -114,8 +114,9 @@ void SclmP105Shield::Cls()
 		Write(i, static_cast<uint8_t>(Color::Black) << 5);
 	}
 	for(uint8_t i=0; i<0x10; i++){
-		GlyphChar(i, '0'+i);
+		Glyph(i, glyph[i]);
 	}
+	bitString=0;
 }
 
 void SclmP105Shield::Color(uint8_t address, ::Color color)
@@ -300,10 +301,12 @@ void SclmP105Shield::String(::String string, ::Color color, Line line)
 	}
 }
 
-void SclmP105Shield::Glyph(uint8_t id, uint8_t glyph)
+void SclmP105Shield::Glyph(uint8_t id, uint8_t glyph_)
 {
 	if(id >= 0x10) return;
-	Write(0x1b + id, glyph);
+	Write(0x1b + id, glyph_);
+	if(glyph_ == glyph[id]) bitString &= ~(0x0001 << id);
+	else                                   bitString |=   0x0001 << id;
 }
 
 void SclmP105Shield::GlyphChar(uint8_t id, char c)
@@ -312,10 +315,6 @@ void SclmP105Shield::GlyphChar(uint8_t id, char c)
 	if(c >= '0' && c <= '9')      code = c - '0';
 	else if(c >= 'A' && c <= 'Z') code = c - 'A' + 10;
 	else if(c >= 'a' && c <= 'z') code = c - 'a' + 10;
-	if(code < 0x10){
-		if(id == code) bitString &= ~(0x0001 << id);
-		else           bitString |=   0x0001 << id;
-	}
 	Glyph(id, glyph[code]);
 }
 
@@ -324,21 +323,8 @@ void SclmP105Shield::Reset()
 	for(uint8_t i=0; i<0x1b; i++){
 		Write(i, 0);
 	}
-	GlyphChar(0x00, '0');
-	GlyphChar(0x01, '1');
-	GlyphChar(0x02, '2');
-	GlyphChar(0x03, '3');
-	GlyphChar(0x04, '4');
-	GlyphChar(0x05, '5');
-	GlyphChar(0x06, '6');
-	GlyphChar(0x07, '7');
-	GlyphChar(0x08, '8');
-	GlyphChar(0x09, '9');
-	GlyphChar(0x0a, 'A');
-	GlyphChar(0x0b, 'B');
-	GlyphChar(0x0c, 'C');
-	GlyphChar(0x0d, 'D');
-	GlyphChar(0x0e, 'E');
-	GlyphChar(0x0f, 'F');
+	for(uint8_t i=0; i<0x10; i++){
+		Glyph(i, glyph[i]);
+	}
 	Update();
 }
