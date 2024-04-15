@@ -69,19 +69,11 @@ class SclmP105Shield
 	static constexpr inline uint8_t DB5 = 5;
 	static constexpr inline uint8_t DB6 = 6;
 	static constexpr inline uint8_t DB7 = 7;
-#ifdef PROTOTYPE
-	static constexpr inline uint8_t BUSY = 10;
-	static constexpr inline uint8_t CLK = 9;
-	static constexpr inline uint8_t _CS = 8;
-	static constexpr inline uint8_t _SW1 = 12;
-	static constexpr inline uint8_t _SW2 = 11;
-#else
-	static constexpr inline uint8_t BUSY = 8;
-	static constexpr inline uint8_t CLK = 9;
-	static constexpr inline uint8_t _CS = 10;
-	static constexpr inline uint8_t _SW1 = 11;
-	static constexpr inline uint8_t _SW2 = 12;
-#endif
+	static inline uint8_t BUSY;
+	static inline uint8_t CLK;
+	static inline uint8_t _CS;
+	static inline uint8_t _SW1;
+	static inline uint8_t _SW2;
 	static constexpr inline uint8_t bufferLength = 0x3b;
 	static constexpr inline uint8_t backBufferLength = 10;
 	static constexpr inline uint8_t glyph[] = {
@@ -124,16 +116,14 @@ class SclmP105Shield
 		0b10011010, // Z
 		0b00000000, // 
 	};
+	bool prototype;
 	uint8_t buffer[bufferLength];
 	uint8_t backBuffer[backBufferLength];
 	uint8_t dataLength;
 	uint16_t bitString;
-
-#ifdef PROTOTYPE
 	uint8_t bitrev(uint8_t bits);
-#endif
 public:
-	SclmP105Shield();
+	SclmP105Shield(bool prototype = false);
 	void Update();
 	uint8_t Read(uint8_t address);
 	uint8_t Read(Segment segment);

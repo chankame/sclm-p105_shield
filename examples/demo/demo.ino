@@ -1,4 +1,3 @@
-//#define PROTOTYPE
 #include "sclm-p105_shield.h"
 
 SclmP105Shield *sclmP105Shield;

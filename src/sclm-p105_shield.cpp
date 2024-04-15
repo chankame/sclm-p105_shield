@@ -1,13 +1,22 @@
 #include "sclm-p105_shield.h"
 
-#ifdef PROTOTYPE
-#define CLK_WAIT 0
-#else
 #define CLK_WAIT 5
-#endif
 
-SclmP105Shield::SclmP105Shield() : buffer{}, backBuffer{}, dataLength(0x1b), bitString(0)
+SclmP105Shield::SclmP105Shield(bool prototype) : prototype(prototype), buffer{}, backBuffer{}, dataLength(0x1b), bitString(0)
 {
+	if(prototype){
+		BUSY = 10;
+		CLK = 9;
+		_CS = 8;
+		_SW1 = 12;
+		_SW2 = 11;
+	} else {
+		BUSY = 8;
+		CLK = 9;
+		_CS = 10;
+		_SW1 = 11;
+		_SW2 = 12;
+	}
 	pinMode(DB0, OUTPUT);
 	pinMode(DB1, OUTPUT);
 	pinMode(DB2, OUTPUT);
@@ -28,7 +37,6 @@ SclmP105Shield::SclmP105Shield() : buffer{}, backBuffer{}, dataLength(0x1b), bit
 	Reset();
 }
 
-#ifdef PROTOTYPE
 uint8_t SclmP105Shield::bitrev(uint8_t bits)
 {
 	return bits >> 7 & 0b00000001
@@ -40,36 +48,38 @@ uint8_t SclmP105Shield::bitrev(uint8_t bits)
 		 | bits << 5 & 0b01000000
 		 | bits << 7 & 0b10000000;
 }
-#endif
 
 void SclmP105Shield::Update()
 {
-#if true
 	if(dataLength == 0x1b){
 		for(uint8_t i=0; i<backBufferLength; i++){
 			buffer[0x11+i] = backBuffer[i];
 		}
 	}
-#endif
 	while(digitalRead(BUSY));
 	while(digitalRead(BUSY));
 	digitalWrite(_CS, LOW);
-//  delayMicroseconds(CLK_WAIT);
-	for(uint8_t i=0; i<dataLength; i++){
-		while(digitalRead(BUSY));
-		digitalWrite(CLK, HIGH);
-		auto data = buffer[i];
-#ifdef PROTOTYPE
-		PORTD = bitrev(data);
-#else
-		PORTD = data;
-#endif
-		delayMicroseconds(CLK_WAIT);
-		while(digitalRead(BUSY));
-		digitalWrite(CLK, LOW);
-		delayMicroseconds(CLK_WAIT);
+	if(prototype){
+		for(uint8_t i=0; i<dataLength; i++){
+			while(digitalRead(BUSY));
+			digitalWrite(CLK, HIGH);
+			auto data = buffer[i];
+			PORTD = bitrev(data);
+			delayMicroseconds(CLK_WAIT);
+			while(digitalRead(BUSY));
+			digitalWrite(CLK, LOW);
+			delayMicroseconds(CLK_WAIT);
+		}
+	} else {
+		for(uint8_t i=0; i<dataLength; i++){
+			while(digitalRead(BUSY));
+			digitalWrite(CLK, HIGH);
+			auto data = buffer[i];
+			PORTD = data;
+			while(digitalRead(BUSY));
+			digitalWrite(CLK, LOW);
+		}
 	}
-//  while(digitalRead(BUSY));
 	digitalWrite(_CS, HIGH);
 	if(dataLength > 0x1b){
 		dataLength = 0x1b;
