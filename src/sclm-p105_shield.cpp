@@ -73,6 +73,7 @@ void SclmP105Shield::Update()
 	} else {
 		for(uint8_t i=0; i<dataLength; i++){
 			while(digitalRead(BUSY));
+			while(digitalRead(BUSY));
 			digitalWrite(CLK, HIGH);
 			auto data = buffer[i];
 			PORTD = data;
